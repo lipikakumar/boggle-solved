@@ -107,14 +107,10 @@ class Dictionary {
 
 class Boggle {
 
-    const WIDTH  = 4;
-    const HEIGHT = 4;
-
     private $dictionary;
     private $board;
     private $solution;
     private $pathTaken;
-
 
     function __construct($dictionary) {
         $this->dictionary = $dictionary;
@@ -126,27 +122,22 @@ class Boggle {
                   $this->pathTaken[$i][$j] = false;  
             }
         }
+        $this->board = self::getBoard();
+      }
 
-        //$board = array();
-        // for($y=0; $y<self::HEIGHT; $y++){
-        //     $row = array();
-        //     for($x=0; $x<self::WIDTH; $x++){
-        //         array_push($row, self::getRandomLetter());
-        //     }
-        //     array_push($board, $row);  
-        // }
+    function getBoard(){
+        $boggleBoard = array();
+        for($x=0; $x<4; $x++){
+            for($y=0; $y<4; $y++){
+                $boggleBoard[$x][$y] = self::getRandomLetter();
+            }  
+        }
 
-         $this->board = array(
-                 array('c', 'l', 'r', 'i'),
-                 array('p', 'a', 'y', 'a'),
-                 array('t', 'p', 't', 'b'),
-                 array('i', 'l', 'n', 'i'),
-             );
-
+        return $boggleBoard;
       }
 
     function getRandomLetter(){
-        $alphabetList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $alphabetList = 'abcdefghijklmnopqrstuvwxyz';
         $letterIndex  = rand(0, 25);
 
         return $alphabetList[$letterIndex];
@@ -222,11 +213,8 @@ class Boggle {
     }
 
 }
-
-
-   $dictionary = new Dictionary("wordlist.txt");
-   echo "Dictionary Complete\n";
-
+    $dictionary = new Dictionary("wordlist.txt");
+    echo "Dictionary Complete\n";
     $boggle     = new Boggle($dictionary);
     $solution   = $boggle->getBoardSolution();
     echo 'SOLUTION: ';
