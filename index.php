@@ -77,36 +77,33 @@ class Dictionary {
    *   2 -> Valid So far but word not completed yet
    */
 
-public function searchWord($word) {
-    $len = strlen($word);
-    if ( $len == 0 ) {
-      return 0;
-    }
-    $parent = $this->rootNode; 
-    for( $i=0; $i < $len; $i++) {
-      $ch = $word[$i]; 
-      $node = $parent->getChild($ch); 
-      if ( $node == null ) { 
+    public function searchWord($word) {
+
+        $len = strlen($word);
+        if ( $len == 0 ) {
+            return 0;
+        }
+        $parent = $this->rootNode; 
+        for( $i=0; $i < $len; $i++) {
+        $ch = $word[$i]; 
+        $node = $parent->getChild($ch); 
+        if ( $node == null ) { 
         return 0;
-      }
-      $parent = $node;
+        }
+        $parent = $node;
+        }
+        if ( $parent->isEndOfWord() ) {
+        //echo "Found word: ".$word."\n";
+        return 1;
+        } else {
+        // Valid start of some word(s)        
+        return 2;
+        }
     }
-    if ( $parent->isEndOfWord() ) {
-      //echo "Found word: ".$word."\n";
-      return 1;
-    } else {
-      // Valid start of some word(s)        
-      return 2;
-    }
-  }
 
 }
 
 
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
 
 class Boggle {
 
@@ -116,14 +113,21 @@ class Boggle {
     private $dictionary;
     private $board;
     private $solution;
+    private $pathTaken;
 
 
     function __construct($dictionary) {
         $this->dictionary = $dictionary;
         $this->solution = array();
 
-        $board = array();
+        $this->pathTaken = array();
+        for($i=0; $i<4; $i++){
+            for($j=0; $j<4; $j++){
+                  $this->pathTaken[$i][$j] = false;  
+            }
+        }
 
+        //$board = array();
         // for($y=0; $y<self::HEIGHT; $y++){
         //     $row = array();
         //     for($x=0; $x<self::WIDTH; $x++){
@@ -152,96 +156,81 @@ class Boggle {
 
         $start = round(microtime(true) * 1000); 
 
-         echo "Start Time: ".$start.'<br>';
-
-        $solution  = array();
-        $pathTaken = array(
-
-            array('false', 'false', 'false', 'false'), 
-            array('false', 'false', 'false', 'false'),
-            array('false', 'false', 'false', 'false'),
-            array('false', 'false', 'false', 'false'));
-
-
+         //echo "Start Time: ".$start.'<br>';
         foreach($this->board as $y => $row){    
             foreach($row as $x => $letter){
-                self::traversePath($x, $y, '', $pathTaken);
+                self::traversePath($x, $y, '', $this->pathTaken);
             }
         }
 
       $timeTaken = round(microtime(true) * 1000) - $start;
-      echo "\nTime taken: $timeTaken\n";
+      //echo "\nTime taken: $timeTaken\n";
 
-        return $this->$solution;
+        return $this->solution;
     }
 
-    function traversePath($x, $y, $path, $pathTaken){
+    function traversePath($x, $y, $path){
+        //  echo '('.$x.','.$y.')';
+        // echo "\n";
 
         // add letter to path
-        $newPath = $path.$this->board[$y][$x];
-        $pathTaken[$y][$x] = true;
+        // echo 'old path: '.$path."\n";
 
-         // search for path
+        $newPath = $path.$this->board[$x][$y];
+        $this->pathTaken[$x][$y] = true;
+
+         //echo 'new path to search: '.$newPath."\n";
          $searchResult = $this->dictionary->searchWord($newPath);
 
-         echo '<br><br>';
-        var_dump($searchResult);
-          
-            if ( $searchResult == 0 ) {
-                return;
-            }
-            
-            if ( $searchResult == 1 ) {
-                array_push($this->solution, $newPath);
-            }         
+        // echo 'new path: '.$searchResult;
+        if ( $searchResult == 0 ) {
+            $this->pathTaken[$x][$y] = false;
+            return;
+        }
+
+        if ( $searchResult == 1 ) {
+            // echo 'word found: '.$newPath."\n";
+            array_push($this->solution, $newPath);
+        }    
 
         for($rowOffset = -1; $rowOffset <= 1; $rowOffset++) {
-
             $newRow = $x + $rowOffset;
+            //echo 'new row: '. $newRow."\n";
             if ( $newRow < 0 || $newRow >= 4 ) {
               continue; 
             }
-
             for($colOffset = -1; $colOffset <= 1; $colOffset++) {
-
               $newCol = $y + $colOffset;
-
-              if ( $newCol < 0 || $newCol <= 4 ) {
+               //echo 'new col: '. $newCol."\n";
+              if ( $newCol < 0 || $newCol >= 4 ) {
+                // echo 'continue';
                 continue;
               }
-                
+              if ( $this->pathTaken[$newRow][$newCol] == false ) {
 
-              if ( $pathTaken[$newRow][$newCol] == false ) {
-                echo $newPath;
-                
+                // var_dump($this->pathTaken);
+              // echo 'call traversal method again';
 
                 self::traversePath($newRow, $newCol, $newPath);
               }
-
 
             }
 
           }
 
-          $selected[$row][$col] = false;
+        $this->pathTaken[$x][$y] = false;
     }
 
 }
 
 
    $dictionary = new Dictionary("wordlist.txt");
-   echo 'Dictionary Complete<br>';
+   echo "Dictionary Complete\n";
 
-echo    $dictionary->searchWord('c');
-echo    $dictionary->searchWord('ca');
-echo    $dictionary->searchWord('cat');
-//$boggle     = new Boggle($dictionary);
-//   $solution   = $boggle->getBoardSolution();
-// echo 'SOLUTION: ';
-// print_r($solution);
-
-
-
+    $boggle     = new Boggle($dictionary);
+    $solution   = $boggle->getBoardSolution();
+    echo 'SOLUTION: ';
+    print_r($solution);
 ?>
 
 
