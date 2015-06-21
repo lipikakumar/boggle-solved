@@ -41,7 +41,7 @@ class Dictionary {
   private $rootNode;
     
     function __construct($wordsFileName) {
-        $this->rootNode = new Node;
+        $this->rootNode = new Node();
         $words = file($wordsFileName, FILE_IGNORE_NEW_LINES);
         foreach ( $words as $word ) {
           $this->addWord($word);
@@ -77,39 +77,30 @@ class Dictionary {
    *   2 -> Valid So far but word not completed yet
    */
 
-  public function searchWord($word) {
-
-    echo $word.'<br>';
-
+public function searchWord($word) {
     $len = strlen($word);
     if ( $len == 0 ) {
       return 0;
     }
     $parent = $this->rootNode; 
-
     for( $i=0; $i < $len; $i++) {
-
       $ch = $word[$i]; 
       $node = $parent->getChild($ch); 
-
       if ( $node == null ) { 
         return 0;
       }
-
       $parent = $node;
-
-    echo $parent->isEndOfWord() ;
-
     }
-
     if ( $parent->isEndOfWord() ) {
+      //echo "Found word: ".$word."\n";
       return 1;
     } else {
+      // Valid start of some word(s)        
       return 2;
     }
   }
-}
 
+}
 
 
 ////////////////////////////////////////////////////////////////////
@@ -184,9 +175,7 @@ class Boggle {
         return $this->$solution;
     }
 
-
     function traversePath($x, $y, $path, $pathTaken){
-
 
         // add letter to path
         $newPath = $path.$this->board[$y][$x];
@@ -195,9 +184,8 @@ class Boggle {
          // search for path
          $searchResult = $this->dictionary->searchWord($newPath);
 
-         echo '<br><br>';
-        var_dump($searchResult);
-         exit( $searchResult);
+            echo '<br><br>';
+            var_dump($searchResult);
           
             if ( $searchResult == 0 ) {
                 return;
@@ -206,13 +194,12 @@ class Boggle {
             if ( $searchResult == 1 ) {
                 array_push($this->solution, $newPath);
             }
-
-
+         
 
         for($rowOffset = -1; $rowOffset <= 1; $rowOffset++) {
 
             $newRow = $x + $rowOffset;
-            if ( $newRow < 0 && $newRow < 4 ) {
+            if ( $newRow > 0 && $newRow < 4 ) {
               continue; 
             }
 
@@ -220,14 +207,12 @@ class Boggle {
 
               $newCol = $y + $colOffset;
 
-              if ( $newCol < 0 && $newCol < 4 ) {
+              if ( $newCol > 0 && $newCol < 4 ) {
                 continue;
               }
                 
 
-              if ( $pathTaken[$newRow][$newCol] == false ) {
-                echo $newPath;
-                
+              if ( $pathTaken[$newCol][$newRow] == false ) {
 
                 self::traversePath($newRow, $newCol, $newPath);
               }
@@ -243,14 +228,16 @@ class Boggle {
 }
 
 
-   $dictionary = new Dictionary("wordlist.txt");
-   echo 'Dictionary Complete<br>';
-     $boggle     = new Boggle($dictionary);
+    $dictionary = new Dictionary("wordlist.txt");
+    echo 'Dictionary Complete<br>';
 
-    $solution   = $boggle->getBoardSolution();
+    echo    $dictionary->searchWord('c');
 
-    echo 'SOLUTION: ';
-    print_r($solution);
+
+    // $boggle     = new Boggle($dictionary);
+    // $solution   = $boggle->getBoardSolution();
+    // echo 'SOLUTION: ';
+    // print_r($solution);
 
 
 
