@@ -184,22 +184,21 @@ class Boggle {
          // search for path
          $searchResult = $this->dictionary->searchWord($newPath);
 
-            echo '<br><br>';
-            var_dump($searchResult);
+         echo '<br><br>';
+        var_dump($searchResult);
           
             if ( $searchResult == 0 ) {
                 return;
             }
-
+            
             if ( $searchResult == 1 ) {
                 array_push($this->solution, $newPath);
-            }
-         
+            }         
 
         for($rowOffset = -1; $rowOffset <= 1; $rowOffset++) {
 
             $newRow = $x + $rowOffset;
-            if ( $newRow > 0 && $newRow < 4 ) {
+            if ( $newRow < 0 || $newRow >= 4 ) {
               continue; 
             }
 
@@ -207,12 +206,14 @@ class Boggle {
 
               $newCol = $y + $colOffset;
 
-              if ( $newCol > 0 && $newCol < 4 ) {
+              if ( $newCol < 0 || $newCol <= 4 ) {
                 continue;
               }
                 
 
-              if ( $pathTaken[$newCol][$newRow] == false ) {
+              if ( $pathTaken[$newRow][$newCol] == false ) {
+                echo $newPath;
+                
 
                 self::traversePath($newRow, $newCol, $newPath);
               }
@@ -228,16 +229,16 @@ class Boggle {
 }
 
 
-    $dictionary = new Dictionary("wordlist.txt");
-    echo 'Dictionary Complete<br>';
+   $dictionary = new Dictionary("wordlist.txt");
+   echo 'Dictionary Complete<br>';
 
-    echo    $dictionary->searchWord('c');
-
-
-    // $boggle     = new Boggle($dictionary);
-    // $solution   = $boggle->getBoardSolution();
-    // echo 'SOLUTION: ';
-    // print_r($solution);
+echo    $dictionary->searchWord('c');
+echo    $dictionary->searchWord('ca');
+echo    $dictionary->searchWord('cat');
+//$boggle     = new Boggle($dictionary);
+//   $solution   = $boggle->getBoardSolution();
+// echo 'SOLUTION: ';
+// print_r($solution);
 
 
 
