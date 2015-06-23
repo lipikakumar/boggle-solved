@@ -103,8 +103,6 @@ class Dictionary {
 
 }
 
-
-
 class Boggle {
 
     private $dictionary;
@@ -146,62 +144,43 @@ class Boggle {
     function getBoardSolution(){
 
         $start = round(microtime(true) * 1000); 
-
-         //echo "Start Time: ".$start.'<br>';
         foreach($this->board as $y => $row){    
             foreach($row as $x => $letter){
                 self::traversePath($x, $y, '', $this->pathTaken);
             }
         }
 
-      $timeTaken = round(microtime(true) * 1000) - $start;
-      //echo "\nTime taken: $timeTaken\n";
-
+        $timeTaken = round(microtime(true) * 1000) - $start;
         return $this->solution;
     }
 
     function traversePath($x, $y, $path){
-        //  echo '('.$x.','.$y.')';
-        // echo "\n";
-
-        // add letter to path
-        // echo 'old path: '.$path."\n";
 
         $newPath = $path.$this->board[$x][$y];
         $this->pathTaken[$x][$y] = true;
 
-         //echo 'new path to search: '.$newPath."\n";
-         $searchResult = $this->dictionary->searchWord($newPath);
+        $searchResult = $this->dictionary->searchWord($newPath);
 
-        // echo 'new path: '.$searchResult;
         if ( $searchResult == 0 ) {
             $this->pathTaken[$x][$y] = false;
             return;
         }
 
         if ( $searchResult == 1 ) {
-            // echo 'word found: '.$newPath."\n";
             array_push($this->solution, $newPath);
         }    
 
         for($rowOffset = -1; $rowOffset <= 1; $rowOffset++) {
             $newRow = $x + $rowOffset;
-            //echo 'new row: '. $newRow."\n";
             if ( $newRow < 0 || $newRow >= 4 ) {
               continue; 
             }
             for($colOffset = -1; $colOffset <= 1; $colOffset++) {
               $newCol = $y + $colOffset;
-               //echo 'new col: '. $newCol."\n";
               if ( $newCol < 0 || $newCol >= 4 ) {
-                // echo 'continue';
                 continue;
               }
               if ( $this->pathTaken[$newRow][$newCol] == false ) {
-
-                // var_dump($this->pathTaken);
-              // echo 'call traversal method again';
-
                 self::traversePath($newRow, $newCol, $newPath);
               }
 
