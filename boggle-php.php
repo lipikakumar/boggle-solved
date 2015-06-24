@@ -32,7 +32,6 @@ class Node {
     if(array_key_exists($char,  $this->children)){
         return $this->children[$char];
     }
-
   }
 }
 
