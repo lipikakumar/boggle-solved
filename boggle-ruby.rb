@@ -50,24 +50,19 @@ class Dictionary
   end
   
   def addWord(word)
-    #puts word
       len = word.length
-    #puts "#{len}"
       if len == 0 
         return nil
       end
       parent = @rootNode
       len.times do |i|
         ch = word[i] 
-       #puts "#{i} : #{ch}"
         node = parent.getChild(ch)
         if node == nil 
           node = parent.addChild(ch)
         end
         parent = node
       end
-      #puts "marks end of word: #{parent.markEndOfWord}"
-
       return parent.markEndOfWord
   end
 
@@ -94,21 +89,127 @@ class Dictionary
 
 end
 
-dictionary = Dictionary.new("short-wordlist.txt")
-word = "abaft"
-prefix = "ab"
-garbage = "oijiud"
+class Boggle
 
-puts "#{word}"
-puts dictionary.searchWord(word)
+    @dictionary
+    @board
+    @solution
+    @pathTaken
+
+    WIDTH = 4
+    HEIGHT = 4
+
+    def initialize(dictionary)
+        @dictionary = dictionary
+        @solution   = Array.new
+        @pathTaken  = Hash.new{|h, k| h[k] = {}}
+        WIDTH.times do |i|
+          HEIGHT.times do |j|
+            @pathTaken[i][j] = false
+          end
+        end
+        @board = getRandomBoard()
+    end
+
+    def getRandomBoard
+      boggleBoard = Hash.new{|h, k| h[k] = {}}
+      WIDTH.times do |i|
+        HEIGHT.times do |j|
+           boggleBoard[i][j] = getRandomLetter()
+        end
+      end
+      return boggleBoard
+    end
+
+    def getRandomLetter
+        alphabetList = 'abcdefghijklmnopqrstuvwxyz';
+        letterIndex  = rand(0..25);
+        return alphabetList[letterIndex]
+    end
+
+    def printBoard
+      puts "--Board--------"
+      WIDTH.times do |i|
+        HEIGHT.times do |j|
+           print "#{@board[i][j]} "
+        end
+        puts ""
+      end
+      puts "--Board--------"
+    end
+
+    def getBoardSolution
+
+      WIDTH.times do |x, row|
+        HEIGHT.times do |y|
+           traversePath(x, y, '')
+        end
+      end
+        @solution.each do |word|
+          puts word
+        end
+
+        return @solution
+    end
+
+    def traversePath(x, y, path)
+
+        newPath = path + @board[x][y]
+        @pathTaken[x][y] = true
+
+        searchResult = @dictionary.searchWord(newPath)
+        #puts "#{newPath} : #{searchResult}"
+        if searchResult == 0 
+            @pathTaken[x][y] = false
+            return
+        end
+
+        if searchResult == 1
+           @solution << newPath
+        end  
+
+        (-1..1).each do |rowOffset|
+            newRow = x + rowOffset;
+            if newRow < 0 || newRow >= 4
+              next 
+            end
+          (-1..1).each do |colOffset|
+              newCol = y + colOffset;
+              if newCol < 0 || newCol >= 4
+                next
+              end
+              if @pathTaken[newRow][newCol] == false
+                traversePath(newRow, newCol, newPath);
+              end
+          end
+        end
+
+        @pathTaken[x][y] = false
+    end
+
+end
+
+##########################################################
 
 
-puts "#{prefix}"
-puts dictionary.searchWord(prefix)
+dictionary = Dictionary.new("wordlist.txt")
+# word = "abaft"
+# prefix = "ab"
+# garbage = "oijiud"
 
-puts "#{garbage}"
-puts dictionary.searchWord(garbage)
+# puts "#{word}"
+# puts dictionary.searchWord(word)
 
-puts "Dictionary Complete"
+# puts "#{prefix}"
+# puts dictionary.searchWord(prefix)
+
+# puts "#{garbage}"
+# puts dictionary.searchWord(garbage)
+
+# puts "Dictionary Complete"
+
+boggle = Boggle.new(dictionary)
+boggle.printBoard
+boggle.getBoardSolution
 
 

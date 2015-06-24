@@ -145,7 +145,7 @@ class Boggle {
         $start = round(microtime(true) * 1000); 
         foreach($this->board as $y => $row){    
             foreach($row as $x => $letter){
-                self::traversePath($x, $y, '', $this->pathTaken);
+                self::traversePath($x, $y, '');
             }
         }
 
