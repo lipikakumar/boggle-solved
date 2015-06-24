@@ -3,83 +3,102 @@ class Node
   @eow
   @children
 
-  def initialize()
+  def initialize
     @eow = false
     @children = nil
   end
 
   def addChild(char)
     if @children == nil 
-      @children = []
+      @children = Hash.new
     end
-    @children[char] = Node.new
+    key = char.to_sym
+    node = Node.new
+    @children[key] = node
   end
 
-  def markEndOfWord()
+  def markEndOfWord
     @eow = true
   end
 
-  def isEndOfWord()
+  def isEndOfWord
     @eow
   end
 
   def getChild(char)
-    if @children == nil
-      nil
-    end
-    (@children[char] == nil) ? @children[char] : nil 
+    key = char.to_sym
+    @children == nil ? nil : @children[key] 
   end
-
 end
 
 class Dictionary
-  @rootNode;
+  @rootNode
+
   def initialize(wordsFileName) 
     @rootNode = Node.new
     aFile = File.new(wordsFileName, "r")
-    aFile.each_line {|line| addWord(line)}
+    aFile.each_line do |line| 
+      addWord(line)
+    end
     aFile.close
   end
   
   def addWord(word)
-      len = word.length;
-      if ( len == 0 ) 
+      len = word.length
+      if len == 0 
         return
       end
-      parent = @rootNode; 
+      parent = @rootNode
+
       len.times do |i|
         ch = word[i] 
         node = parent.getChild(ch)
-        if ( node == nil ) 
+        if node == nil 
           node = parent.addChild(ch)
         end
         parent = node
       end
-      @parent.markEndOfWord()
+      parent.markEndOfWord
   end
 
   def searchWord(word)
-    len = word.length;
-    if (len == 0)
-        0
+    len = word.length
+    if len == 0
+      0
     end
-    parent = @rootNode; 
+    parent = @rootNode
     len.times do |i| 
-      ch    = word[i] 
-      node = parent.getChild(ch); 
-      if ( node == nil )
+      ch = word[i]
+      node = parent.getChild(ch)
+      # the prefix does not exist 
+      # in the dictionary so no need to keep searching
+      if node == nil 
         0
       end
       parent = node;
     end
-      parent.isEndOfWord() ? 1 : 2
-
+    parent.isEndOfWord ? 1 : 2
   end
-
+  def getRootNode 
+      @rootNode
+  end
 end
 
+dictionary = Dictionary.new("short-wordlist.txt")
+dictionary.getRootNode()
+
+# word = "abaft"
+# prefix = "ab"
+# garbage = "oijiud"
+
+#puts dictionary.searchWord(word)
+
+# puts "Prefix: #{prefix}"
+# puts dictionary.searchWord(prefix)
+
+# puts "Garbage: #{garbage}"
+# puts dictionary.searchWord(garbage)
+
+# puts "Dictionary Complete"
 
 
-puts "Dictionary Complete"
-
-dictionary = Dictionary.new("wordlist.txt")
