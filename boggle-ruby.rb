@@ -42,25 +42,33 @@ class Dictionary
   def initialize(wordsFileName) 
     @rootNode = Node.new
     aFile = File.new(wordsFileName, "r")
-    aFile.each_line {|line| addWord(line)}
+    aFile.each_line {|line|
+    word = line.to_s.strip
+    addWord(word)
+   }
     aFile.close
   end
   
   def addWord(word)
+    #puts word
       len = word.length
+    #puts "#{len}"
       if len == 0 
-        return
+        return nil
       end
       parent = @rootNode
       len.times do |i|
         ch = word[i] 
+       #puts "#{i} : #{ch}"
         node = parent.getChild(ch)
         if node == nil 
           node = parent.addChild(ch)
         end
         parent = node
       end
-      parent.markEndOfWord
+      #puts "marks end of word: #{parent.markEndOfWord}"
+
+      return parent.markEndOfWord
   end
 
   def searchWord(word)
@@ -77,18 +85,23 @@ class Dictionary
       end
       parent = node;
     end
-    parent.isEndOfWord ? 1 : 2
+    if parent.isEndOfWord
+      return 1
+    else
+      return 2
+    end
   end
 
 end
 
-dictionary = Dictionary.new("wordlist.txt")
+dictionary = Dictionary.new("short-wordlist.txt")
 word = "abaft"
 prefix = "ab"
 garbage = "oijiud"
 
 puts "#{word}"
 puts dictionary.searchWord(word)
+
 
 puts "#{prefix}"
 puts dictionary.searchWord(prefix)
