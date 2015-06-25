@@ -1,10 +1,11 @@
 
 class Node
-  @eow
+  @isEndOfWord
   @children
 
+  public 
   def initialize
-    @eow = false
+    @isEndOfWord = false
     @children = nil
   end
 
@@ -18,11 +19,11 @@ class Node
   end
 
   def markEndOfWord
-    @eow = true
+    @isEndOfWord = true
   end
 
   def isEndOfWord
-    @eow
+    @isEndOfWord\
   end
 
   def getChild(char)
@@ -38,7 +39,12 @@ class Node
 end
 
 class Dictionary
-  @rootNode;
+  @rootNode
+  WORD_NOT_FOUND = 0
+  WORD_FOUND     = 1
+  PREFIX_FOUND   = 2
+
+  public
   def initialize(wordsFileName) 
     @rootNode = Node.new
     aFile = File.new(wordsFileName, "r")
@@ -49,7 +55,29 @@ class Dictionary
     aFile.close
   end
   
-  def addWord(word)
+  def searchWord(word)
+    len = word.length;
+    if len == 0
+      return WORD_NOT_FOUND
+    end
+    parent = @rootNode
+    len.times do |i| 
+      ch = word[i]
+      node = parent.getChild(ch)
+      if node == nil 
+        return WORD_NOT_FOUND
+      end
+      parent = node;
+    end
+    if parent.isEndOfWord
+      return WORD_FOUND
+    else
+      return PREFIX_FOUND
+    end
+  end
+
+  private
+    def addWord(word)
       len = word.length
       if len == 0 
         return nil
@@ -66,27 +94,6 @@ class Dictionary
       return parent.markEndOfWord
   end
 
-  def searchWord(word)
-    len = word.length;
-    if len == 0
-      return 0
-    end
-    parent = @rootNode
-    len.times do |i| 
-      ch = word[i]
-      node = parent.getChild(ch)
-      if node == nil 
-        return 0
-      end
-      parent = node;
-    end
-    if parent.isEndOfWord
-      return 1
-    else
-      return 2
-    end
-  end
-
 end
 
 class Boggle
@@ -96,9 +103,10 @@ class Boggle
     @solution
     @pathTaken
 
-    WIDTH = 4
+    WIDTH  = 4
     HEIGHT = 4
-
+    
+    public
     def initialize(dictionary)
         @dictionary = dictionary
         @solution   = Array.new
@@ -111,22 +119,6 @@ class Boggle
         @board = getRandomBoard()
     end
 
-    def getRandomBoard
-      boggleBoard = Hash.new{|h, k| h[k] = {}}
-      WIDTH.times do |i|
-        HEIGHT.times do |j|
-           boggleBoard[i][j] = getRandomLetter()
-        end
-      end
-      return boggleBoard
-    end
-
-    def getRandomLetter
-        alphabetList = 'abcdefghijklmnopqrstuvwxyz';
-        letterIndex  = rand(0..25);
-        return alphabetList[letterIndex]
-    end
-
     def printBoard
       puts "--Board--------"
       WIDTH.times do |i|
@@ -135,30 +127,34 @@ class Boggle
         end
         puts ""
       end
-      puts "--Board--------"
+      puts "---------------"
     end
 
     def getBoardSolution
 
-      WIDTH.times do |x, row|
+      WIDTH.times do |x|
         HEIGHT.times do |y|
            traversePath(x, y, '')
         end
       end
-        @solution.each do |word|
-          puts word
-        end
+      return printSolution
+    end
 
-        return @solution
+    def printSolution
+      puts "--Solution------"
+      @solution.each do |word|
+        puts word
+      end
+      puts "----------------"
+      return @solution.uniq!
+
     end
 
     def traversePath(x, y, path)
-
         newPath = path + @board[x][y]
         @pathTaken[x][y] = true
 
         searchResult = @dictionary.searchWord(newPath)
-        #puts "#{newPath} : #{searchResult}"
         if searchResult == 0 
             @pathTaken[x][y] = false
             return
@@ -183,32 +179,33 @@ class Boggle
               end
           end
         end
-
         @pathTaken[x][y] = false
+    end
+
+    private
+    def getRandomBoard
+      boggleBoard = Hash.new{|h, k| h[k] = {}}
+      WIDTH.times do |i|
+        HEIGHT.times do |j|
+           boggleBoard[i][j] = getRandomLetter()
+        end
+      end
+      return boggleBoard
+    end
+
+    def getRandomLetter
+        alphabetList = 'abcdefghijklmnopqrstuvwxyz';
+        letterIndex  = rand(0..25);
+        return alphabetList[letterIndex]
     end
 
 end
 
 ##########################################################
 
-
-dictionary = Dictionary.new("wordlist.txt")
-# word = "abaft"
-# prefix = "ab"
-# garbage = "oijiud"
-
-# puts "#{word}"
-# puts dictionary.searchWord(word)
-
-# puts "#{prefix}"
-# puts dictionary.searchWord(prefix)
-
-# puts "#{garbage}"
-# puts dictionary.searchWord(garbage)
-
-# puts "Dictionary Complete"
-
-boggle = Boggle.new(dictionary)
+wordListFilePath = "wordlist.txt"
+dictionary = Dictionary.new(wordListFilePath)
+boggle     = Boggle.new(dictionary)
 boggle.printBoard
 boggle.getBoardSolution
 
